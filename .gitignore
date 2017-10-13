@@ -1,0 +1,26 @@
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# Eclipse project files
+.classpath
+.settings/
+.project
+.DS_Store
+.idea/
+*.iml
+
+#build 
+target/
+tomcat.*/
+test-output/
+do_not_git/
+*.launch
+*.tmp
+
+#Jrebel
+src/main/resources/rebel.xml
+atlassian-ide-plugin.xml
