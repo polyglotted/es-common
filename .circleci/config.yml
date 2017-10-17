@@ -29,7 +29,9 @@ jobs:
 
       - run:
           name: Start Elastic Docker
-          command: docker run -d --name esdocker -p 9200:9200 -e "http.host=0.0.0.0" -e "transport.host=127.0.0.1" steeleye/esdocker:5.6.2
+          command: |
+            docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+            docker run -d --name esdocker -p 9200:9200 -e "http.host=0.0.0.0" -e "transport.host=127.0.0.1" steeleye/esdocker:5.6.2
       - run:
           name: Maven Verify
           command: mvn --settings .ci-settings.xml -Pemma-coverage -Dassembly.skipAssembly=true verify
