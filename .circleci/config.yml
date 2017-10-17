@@ -22,7 +22,7 @@ jobs:
           keys:
           - v1-dependencies-{{ checksum "pom.xml" }}
           - v1-dependencies-
-      - run: mvn --settings .ci-settings.xml -Pemma-coverage -DskipTests install
+      - run: mvn --settings .ci-settings.xml -Pemma-coverage -DskipIntegTests install
       - save_cache:
           paths:
             - ~/.m2

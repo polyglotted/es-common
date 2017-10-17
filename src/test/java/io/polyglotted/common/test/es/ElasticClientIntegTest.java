@@ -12,7 +12,7 @@ import static io.polyglotted.common.es.HighLevelConnector.highLevelClient;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
-public class ElasticClientTest {
+public class ElasticClientIntegTest {
     private ElasticClient elasticClient;
 
     @BeforeMethod
