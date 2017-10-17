@@ -7,6 +7,7 @@ jobs:
     environment:
       MAVEN_OPTS: -Xmx3200m
       artifact_dir: "tmp/artifacts"
+      es_version: "5.6.2"
 
     steps:
       - checkout
@@ -21,25 +22,30 @@ jobs:
           keys:
           - v1-dependencies-{{ checksum "pom.xml" }}
           - v1-dependencies-
-      - run: mvn --settings .ci-settings.xml -DskipTests install
+      - run: mvn --settings .ci-settings.xml -Pemma-coverage -DskipTests install
       - save_cache:
           paths:
             - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
 
+      - restore_cache:
+          keys:
+          - v1-binaries-{{ checksum ".circleci/config.yml" }}
+          - v1-binaries-
       - run:
-          name: Start Elastic Docker
-          command: |
-            echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
-            docker run -d --name esdocker -p 9200:9200 -e "http.host=0.0.0.0" -e "transport.host=127.0.0.1" steeleye/esdocker:5.6.2
-            "[[ $(curl --retry 5 --retry-delay 10 -o /dev/null --silent --head --write-out '%{http_code}' http://esdocker:9200/) = 200 ]]"
+          name: Start ES Cluster
+          command: .circleci/es-start.sh
+      - save_cache:
+          paths:
+            - elasticsearch-${es_version}
+          key: v1-binaries-{{ checksum ".circleci/config.yml" }}
 
       - run:
           name: Maven Verify
           command: mvn --settings .ci-settings.xml -Pemma-coverage -Dassembly.skipAssembly=true verify
       - run:
           name: Stop Elastic Docker
-          command: docker rm -f esdocker
+          command: kill -9 `cat es-pid.txt`
 
       - run:
           name: Collect Test Artifacts
