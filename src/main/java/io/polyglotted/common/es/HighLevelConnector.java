@@ -27,11 +27,7 @@ public class HighLevelConnector {
         RestClientBuilder builder = RestClient.builder(buildHosts(settingsHolder))
             .setMaxRetryTimeoutMillis(settingsHolder.intValue("es.max.retryTimeout.millis", 300_000));
         setCredentials(settingsHolder, builder);
-        SniffOnFailureListener sniffOnFailureListener = new SniffOnFailureListener();
-        RestClient restClient = builder.setFailureListener(sniffOnFailureListener).build();
-        Sniffer sniffer = Sniffer.builder(restClient).setSniffAfterFailureDelayMillis(30000).build();
-        sniffOnFailureListener.setSniffer(sniffer);
-        return new EsRestClient(restClient, sniffer);
+        return (settingsHolder.booleanValue("es.sniffer.enabled", false)) ? sniffingClient(builder) : new EsRestClient(builder.build(), null);
     }
 
     @SuppressWarnings("StaticPseudoFunctionalStyleMethod")
@@ -50,5 +46,12 @@ public class HighLevelConnector {
             credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(userName, password));
             builder.setHttpClientConfigCallback(callback -> callback.setDefaultCredentialsProvider(credentialsProvider));
         }
+    }
+    private static EsRestClient sniffingClient(RestClientBuilder builder) {
+        SniffOnFailureListener sniffOnFailureListener = new SniffOnFailureListener();
+        RestClient restClient = builder.setFailureListener(sniffOnFailureListener).build();
+        Sniffer sniffer = Sniffer.builder(restClient).setSniffAfterFailureDelayMillis(30000).build();
+        sniffOnFailureListener.setSniffer(sniffer);
+        return new EsRestClient(restClient, sniffer);
     }
 }

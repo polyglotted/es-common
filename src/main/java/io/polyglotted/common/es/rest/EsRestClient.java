@@ -60,7 +60,7 @@ public class EsRestClient implements ElasticClient {
 
     public EsRestClient(RestClient restClient, Sniffer sniffer) { this(restClient, sniffer, new RestHighLevelClient(restClient)); }
 
-    @Override public void close() throws Exception { sniffer.close(); restClient.close(); }
+    @Override public void close() throws Exception { if (sniffer != null) { sniffer.close(); } restClient.close(); }
 
     @Override public boolean indexExists(String index) { throw new UnsupportedOperationException(); }
 
@@ -87,7 +87,7 @@ public class EsRestClient implements ElasticClient {
             Response response = restClient.performRequest("GET", "/_cluster/health");
             checkState(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK, response.getStatusLine().getReasonPhrase());
             return MAPPER.readValue(EntityUtils.toString(response.getEntity()), MAP_CLASS);
-        } catch (Exception ioe) { throw handleEx("index failed", ioe); }
+        } catch (Exception ioe) { throw handleEx("clusterHealth failed", ioe); }
     }
 
     @Override public void buildPipeline(String id, String resource) { throw new UnsupportedOperationException(); }
