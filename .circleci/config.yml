@@ -11,18 +11,21 @@ jobs:
 
     steps:
       - checkout
-      - setup_remote_docker
       - run:
           name: Setup Build Variables
           command: echo 'export COMMIT_MESSAGE="$(git log --format=oneline -n 1 $CIRCLE_SHA1)"' >> $BASH_ENV
 
-      - run: curl ${GPG_OUT} -o private.key && gpg2 --allow-secret-key-import --import private.key
+      - run:
+          name: Import GPG Keys
+          command: curl ${GPG_OUT} -o private.key && gpg2 --allow-secret-key-import --import private.key
 
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "pom.xml" }}
           - v1-dependencies-
-      - run: mvn --settings .ci-settings.xml -Pemma-coverage -DskipIntegTests install
+      - run:
+          name: Install Maven Dependencies
+          command: mvn --settings .ci-settings.xml -Pemma-coverage -DskipIntegTests install
       - save_cache:
           paths:
             - ~/.m2
