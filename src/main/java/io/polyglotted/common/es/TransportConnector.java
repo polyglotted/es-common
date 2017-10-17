@@ -1,6 +1,7 @@
 package io.polyglotted.common.es;
 
 import io.polyglotted.applauncher.settings.SettingsHolder;
+import io.polyglotted.common.es.transport.EsTransportClient;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.client.transport.TransportClient;
@@ -31,11 +32,11 @@ public abstract class TransportConnector {
     private static final Setting<String> EC2_HOST_PROVIDER = new Setting<>("discovery.zen.hosts_provider", EC2_DISCOVERY, s -> s.toLowerCase(Locale.ROOT), NodeScope);
 
     @SneakyThrows
-    public static TransportClient transportClient(SettingsHolder settingsHolder) {
+    public static ElasticClient transportClient(SettingsHolder settingsHolder) {
         Settings settings = buildSettings(checkNotNull(settingsHolder));
         List<String> masterNodes = ((EC2_DISCOVERY.exists(settings) || EC2_HOST_PROVIDER.exists(settings))
             && "ec2".equals(EC2_HOST_PROVIDER.get(settings))) ? fetchEc2Addresses(settings) : MASTER_NODES.get(settings);
-        return createFrom(settingsHolder, settings, masterNodes);
+        return new EsTransportClient(createFrom(settingsHolder, settings, masterNodes));
     }
 
     private static TransportClient createFrom(SettingsHolder holder, Settings settings, List<String> masterNodes) throws IOException {

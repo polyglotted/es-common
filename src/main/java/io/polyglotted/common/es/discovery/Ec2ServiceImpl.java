@@ -14,7 +14,7 @@ import org.elasticsearch.common.settings.Settings;
 
 import java.util.Random;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 @Slf4j
 final class Ec2ServiceImpl implements Ec2Service {
@@ -78,7 +78,7 @@ final class Ec2ServiceImpl implements Ec2Service {
 
     private static void configureSigner(String signer, ClientConfiguration configuration) {
         try {
-            SignerFactory.getSignerByTypeAndService(checkNotNull(signer, "[null] signer set"), null);
+            SignerFactory.getSignerByTypeAndService(requireNonNull(signer, "[null] signer set"), null);
         } catch (IllegalArgumentException e) {
             log.warn("wrong signer set {} {}", signer, e.getMessage());
         }
