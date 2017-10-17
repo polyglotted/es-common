@@ -81,9 +81,10 @@
         <!-- provided deps -->
         <lombok.version>1.16.18</lombok.version>
         <slf4j.version>1.7.25</slf4j.version>
+        <jcommander.version>1.72</jcommander.version>
         <commonscodec.version>1.10</commonscodec.version>
         <guava.version>23.2-jre</guava.version>
-        <applauncher.version>3.0.1-SNAPSHOT</applauncher.version>
+        <applauncher.version>3.0.1</applauncher.version>
         <hamcrest.version>1.3</hamcrest.version>
         <testng.version>6.11</testng.version>
         <!-- main deps -->
@@ -766,6 +767,12 @@
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.beust</groupId>
+            <artifactId>jcommander</artifactId>
+            <version>${jcommander.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
