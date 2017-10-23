@@ -18,9 +18,9 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.*;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
-import org.elasticsearch.cluster.metadata.MetaData;
 
 import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("unused")
 public interface ElasticClient extends AutoCloseable {
@@ -29,7 +29,13 @@ public interface ElasticClient extends AutoCloseable {
 
     boolean typeExists(String index, String... types);
 
-    MetaData getMeta(String... indices);
+    Set<String> getIndices(String alias);
+
+    String getIndexMeta(String... indices);
+
+    String getSettings(String... indices);
+
+    String getMapping(String index, String type);
 
     void createIndex(CreateIndexRequest request);
 

@@ -3,6 +3,7 @@ package io.polyglotted.common.es.transport;
 import com.google.common.collect.ImmutableMap;
 import io.polyglotted.common.es.ElasticClient;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
@@ -28,17 +29,24 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.health.ClusterHealthStatus;
+import org.elasticsearch.cluster.metadata.AliasMetaData;
+import org.elasticsearch.cluster.metadata.IndexMetaData;
+import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.cluster.metadata.MetaData;
 import org.elasticsearch.common.bytes.BytesArray;
+import org.elasticsearch.common.collect.ImmutableOpenMap;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 import static io.polyglotted.common.es.ElasticException.checkState;
 import static io.polyglotted.common.es.ElasticException.handleEx;
 import static org.elasticsearch.action.support.IndicesOptions.lenientExpandOpen;
 import static org.elasticsearch.client.Requests.refreshRequest;
+import static org.elasticsearch.common.xcontent.ToXContent.EMPTY_PARAMS;
 import static org.elasticsearch.common.xcontent.XContentType.JSON;
 
 @RequiredArgsConstructor
@@ -59,7 +67,89 @@ public class EsTransportClient implements ElasticClient {
         } catch (Exception ex) { throw handleEx("typeExists failed", ex); }
     }
 
-    @Override public MetaData getMeta(String... indices) {
+    @Override public Set<String> getIndices(String alias) {
+        Set<String> indices = new HashSet<>();
+        Iterator<String> indexIt = getMeta(alias).getIndices().keysIt();
+        while (indexIt.hasNext()) { indices.add(indexIt.next()); }
+        return indices;
+    }
+
+    @Override @SneakyThrows(IOException.class) public String getIndexMeta(String... indices) {
+        MetaData indexMetaDatas = getMeta(indices);
+        XContentBuilder builder = XContentFactory.jsonBuilder();
+
+        builder.startArray();
+        ImmutableOpenMap<String, IndexMetaData> getIndices = indexMetaDatas.getIndices();
+        Iterator<String> indexIt = getIndices.keysIt();
+        while (indexIt.hasNext()) {
+            String index = indexIt.next();
+            IndexMetaData metaData = getIndices.get(index);
+            builder.startObject();
+            builder.startObject(index);
+
+            builder.startObject("aliases");
+            ImmutableOpenMap<String, AliasMetaData> aliases = metaData.getAliases();
+            Iterator<String> aIt = aliases.keysIt();
+            while (aIt.hasNext()) {
+                AliasMetaData alias = aliases.get(aIt.next());
+                AliasMetaData.Builder.toXContent(alias, builder, EMPTY_PARAMS);
+            }
+            builder.endObject();
+
+            builder.startObject("mappings");
+            ImmutableOpenMap<String, MappingMetaData> mappings = metaData.getMappings();
+            Iterator<String> mIt = mappings.keysIt();
+            while (mIt.hasNext()) {
+                String type = mIt.next();
+                builder.field(type).map(mappings.get(type).getSourceAsMap());
+            }
+            builder.endObject();
+
+            builder.startObject("settings");
+            Settings settings = metaData.getSettings();
+            settings.toXContent(builder, EMPTY_PARAMS);
+            builder.endObject();
+
+            builder.endObject();
+            builder.endObject();
+        }
+        builder.endArray();
+        return builder.string();
+    }
+
+    @Override @SneakyThrows(IOException.class) public String getSettings(String... indices) {
+        MetaData indexMetaDatas = getMeta(indices);
+        XContentBuilder builder = XContentFactory.jsonBuilder();
+
+        builder.startObject();
+        ImmutableOpenMap<String, IndexMetaData> getIndices = indexMetaDatas.getIndices();
+        Iterator<String> indexIt = getIndices.keysIt();
+        while (indexIt.hasNext()) {
+            String index = indexIt.next();
+            IndexMetaData metaData = getIndices.get(index);
+            builder.startObject(index).startObject("settings");
+            Settings settings = metaData.getSettings();
+            settings.toXContent(builder, EMPTY_PARAMS);
+            builder.endObject().endObject();
+        }
+        builder.endObject();
+        return builder.string();
+    }
+
+    @Override @SneakyThrows(IOException.class) public String getMapping(String index, String type) {
+        ImmutableOpenMap<String, IndexMetaData> getIndices = getMeta(index).getIndices();
+        Iterator<String> indexIt = getIndices.keysIt();
+        while (indexIt.hasNext()) {
+            ImmutableOpenMap<String, MappingMetaData> mappings = getIndices.get(indexIt.next()).getMappings();
+            Iterator<String> mIt = mappings.keysIt();
+            while (mIt.hasNext()) {
+                if (type.equals(mIt.next())) { return mappings.get(type).source().string(); }
+            }
+        }
+        return null;
+    }
+
+    private MetaData getMeta(String... indices) {
         try {
             return internalClient.admin().cluster().prepareState().setIndices(indices).execute().actionGet().getState().metaData();
         } catch (Exception ex) { throw handleEx("getMeta failed", ex); }

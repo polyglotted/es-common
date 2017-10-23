@@ -2,12 +2,13 @@ package io.polyglotted.common.es.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.VisibilityChecker;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import io.polyglotted.common.es.ElasticClient;
 import io.polyglotted.common.es.ElasticException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.apache.http.HttpStatus;
 import org.apache.http.util.EntityUtils;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
@@ -31,10 +32,10 @@ import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.sniff.Sniffer;
-import org.elasticsearch.cluster.metadata.MetaData;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
@@ -43,6 +44,8 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static com.fasterxml.jackson.databind.DeserializationFeature.*;
 import static io.polyglotted.common.es.ElasticException.checkState;
 import static io.polyglotted.common.es.ElasticException.handleEx;
+import static org.apache.http.HttpStatus.SC_MULTIPLE_CHOICES;
+import static org.apache.http.HttpStatus.SC_OK;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class EsRestClient implements ElasticClient {
@@ -54,6 +57,7 @@ public class EsRestClient implements ElasticClient {
         .setVisibility(new VisibilityChecker.Std(NONE, NONE, NONE, ANY, ANY));
     @SuppressWarnings("unchecked")
     private static final Class<Map<String, Object>> MAP_CLASS = (Class<Map<String, Object>>) new TypeToken<Map<String, Object>>() {}.getRawType();
+    private static final Joiner COMMA = Joiner.on(",");
     private final RestClient restClient;
     private final Sniffer sniffer;
     private final RestHighLevelClient internalClient;
@@ -66,7 +70,24 @@ public class EsRestClient implements ElasticClient {
 
     @Override public boolean typeExists(String index, String... types) { throw new UnsupportedOperationException(); }
 
-    @Override public MetaData getMeta(String... indices) { throw new UnsupportedOperationException(); }
+    @Override public Set<String> getIndices(String alias) {
+        try {
+            Map<String, Object> responseObject = MAPPER.readValue(performCliRequest("/" + alias + "/_aliases"), MAP_CLASS);
+            return ImmutableSet.copyOf(responseObject.keySet());
+        } catch (Exception ioe) { throw handleEx("getIndices failed", ioe); }
+    }
+
+    @Override public String getIndexMeta(String... indices) {
+        try { return performCliRequest("/" + COMMA.join(indices) + "/"); } catch (Exception ioe) { throw handleEx("getIndexMeta failed", ioe); }
+    }
+
+    @Override public String getSettings(String... indices) {
+        try { return performCliRequest("/" + COMMA.join(indices) + "/_settings"); } catch (Exception e) { throw handleEx("getSettings failed", e); }
+    }
+
+    @Override public String getMapping(String index, String type) {
+        try { return performCliRequest("/" + index + "/" + type + "/_mapping"); } catch (Exception e) { throw handleEx("getSettings failed", e); }
+    }
 
     @Override public void createIndex(CreateIndexRequest request) { throw new UnsupportedOperationException(); }
 
@@ -84,9 +105,7 @@ public class EsRestClient implements ElasticClient {
 
     @Override public Map<String, Object> clusterHealth() {
         try {
-            Response response = restClient.performRequest("GET", "/_cluster/health");
-            checkState(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK, response.getStatusLine().getReasonPhrase());
-            return MAPPER.readValue(EntityUtils.toString(response.getEntity()), MAP_CLASS);
+            return MAPPER.readValue(performCliRequest("/_cluster/health"), MAP_CLASS);
         } catch (Exception ioe) { throw handleEx("clusterHealth failed", ioe); }
     }
 
@@ -130,5 +149,12 @@ public class EsRestClient implements ElasticClient {
 
     @Override public ClearScrollResponse clearScroll(ClearScrollRequest request) {
         try { return internalClient.clearScroll(request); } catch (IOException ioe) { throw new ElasticException("clearScroll failed", ioe); }
+    }
+
+    private String performCliRequest(String endpoint) throws IOException {
+        Response response = restClient.performRequest("GET", endpoint);
+        int statusCode = response.getStatusLine().getStatusCode();
+        checkState(statusCode >= SC_OK && statusCode < SC_MULTIPLE_CHOICES, response.getStatusLine().getReasonPhrase());
+        return EntityUtils.toString(response.getEntity());
     }
 }
