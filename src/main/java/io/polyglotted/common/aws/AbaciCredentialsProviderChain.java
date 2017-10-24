@@ -6,9 +6,9 @@ import lombok.RequiredArgsConstructor;
 
 @SuppressWarnings("WeakerAccess")
 public class AbaciCredentialsProviderChain extends AWSCredentialsProviderChain {
-    public AbaciCredentialsProviderChain(AWSCredentialsProvider defaultProvider) {
-        super(defaultProvider, new EnvironmentVariableCredentialsProvider(), new SystemPropertiesCredentialsProvider(),
-            new ProfileCredentialsProvider(), new EC2ContainerCredentialsProviderWrapper());
+    public AbaciCredentialsProviderChain(AWSCredentialsProvider provider) {
+        super(provider, new STSSessionCredentialsProvider(new EnvironmentVariableCredentialsProvider()), new EnvironmentVariableCredentialsProvider(),
+            new SystemPropertiesCredentialsProvider(), new ProfileCredentialsProvider(), new EC2ContainerCredentialsProviderWrapper());
     }
 
     @RequiredArgsConstructor
