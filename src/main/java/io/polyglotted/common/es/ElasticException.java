@@ -10,6 +10,6 @@ public class ElasticException extends RuntimeException {
     public static void checkState(boolean status, String message) { if (!status) throw new ElasticException(message); }
 
     public static ElasticException handleEx(String message, Throwable cause) {
-        return (cause instanceof ElasticException) ? (ElasticException) cause : new ElasticException(message, cause);
+        return (cause instanceof ElasticException) ? (ElasticException) cause : new ElasticException(message + ": " + cause.getMessage(), cause);
     }
 }

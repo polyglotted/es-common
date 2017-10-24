@@ -7,7 +7,6 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import io.polyglotted.applauncher.settings.Attribute;
 import io.polyglotted.applauncher.settings.Settings;
-import io.polyglotted.common.aws.AbaciCredentialsProviderChain.ConfigCredentialsProvider;
 
 @Settings
 @SuppressWarnings("unused")
@@ -23,16 +22,25 @@ public interface AwsConfig {
     @Attribute(name = "aws.region")
     default String region() { return "eu-west-1"; }
 
+    @Attribute(name = "aws.provider")
+    default String provider() { return "environment"; }
+
+    @Attribute(name = "aws.role_arn")
+    default String roleArn() { return ""; }
+
+    @Attribute(name = "aws.role_session_name")
+    default String roleSessionName() { return "defaultSession"; }
+
     static AmazonSQS createSqsClient(AwsConfig config) {
         return AmazonSQSClientBuilder.standard()
-            .withCredentials(new AbaciCredentialsProviderChain(new ConfigCredentialsProvider(config)))
+            .withCredentials(CredsProvider.getProvider(config))
             .withRegion(Regions.fromName(config.region()))
             .build();
     }
 
     static AmazonSNS createSnsClient(AwsConfig config) {
         return AmazonSNSClientBuilder.standard()
-            .withCredentials(new AbaciCredentialsProviderChain(new ConfigCredentialsProvider(config)))
+            .withCredentials(CredsProvider.getProvider(config))
             .withRegion(Regions.fromName(config.region()))
             .build();
     }

@@ -97,7 +97,7 @@
         <spatial4j.version>0.6</spatial4j.version>
         <jts.version>1.13</jts.version>
         <elasticsearch.version>5.6.2</elasticsearch.version>
-        <awsjavasdk.version>1.11.214</awsjavasdk.version>
+        <awsjavasdk.version>1.11.219</awsjavasdk.version>
         <!-- plugin deps -->
         <enforcer.plugin.version>3.0.0-M1</enforcer.plugin.version>
         <clean.plugin.version>3.0.0</clean.plugin.version>
