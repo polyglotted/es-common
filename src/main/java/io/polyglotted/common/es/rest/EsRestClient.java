@@ -1,10 +1,7 @@
 package io.polyglotted.common.es.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.VisibilityChecker;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.reflect.TypeToken;
 import io.polyglotted.common.es.ElasticClient;
 import io.polyglotted.common.es.ElasticException;
 import lombok.AccessLevel;
@@ -37,26 +34,14 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-import static com.fasterxml.jackson.databind.DeserializationFeature.*;
 import static io.polyglotted.common.es.ElasticException.checkState;
 import static io.polyglotted.common.es.ElasticException.handleEx;
+import static io.polyglotted.common.util.MapperUtil.readToMap;
 import static org.apache.http.HttpStatus.SC_MULTIPLE_CHOICES;
 import static org.apache.http.HttpStatus.SC_OK;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class EsRestClient implements ElasticClient {
-    private static final ObjectMapper MAPPER = new ObjectMapper()
-        .configure(READ_ENUMS_USING_TO_STRING, true).configure(FAIL_ON_UNKNOWN_PROPERTIES, false)
-        .configure(FAIL_ON_NULL_FOR_PRIMITIVES, true).configure(ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
-        .configure(ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true).configure(ADJUST_DATES_TO_CONTEXT_TIME_ZONE, false)
-        .setSerializationInclusion(NON_NULL).setSerializationInclusion(NON_EMPTY)
-        .setVisibility(new VisibilityChecker.Std(NONE, NONE, NONE, ANY, ANY));
-    @SuppressWarnings("unchecked")
-    private static final Class<Map<String, Object>> MAP_CLASS = (Class<Map<String, Object>>) new TypeToken<Map<String, Object>>() {}.getRawType();
     private static final Joiner COMMA = Joiner.on(",");
     private final RestClient restClient;
     private final Sniffer sniffer;
@@ -72,7 +57,7 @@ public class EsRestClient implements ElasticClient {
 
     @Override public Set<String> getIndices(String alias) {
         try {
-            Map<String, Object> responseObject = MAPPER.readValue(performCliRequest("/" + alias + "/_aliases"), MAP_CLASS);
+            Map<String, Object> responseObject = readToMap(performCliRequest("/" + alias + "/_aliases"));
             return ImmutableSet.copyOf(responseObject.keySet());
         } catch (Exception ioe) { throw handleEx("getIndices failed", ioe); }
     }
@@ -105,7 +90,7 @@ public class EsRestClient implements ElasticClient {
 
     @Override public Map<String, Object> clusterHealth() {
         try {
-            return MAPPER.readValue(performCliRequest("/_cluster/health"), MAP_CLASS);
+            return readToMap(performCliRequest("/_cluster/health"));
         } catch (Exception ioe) { throw handleEx("clusterHealth failed", ioe); }
     }
 
