@@ -28,13 +28,16 @@ public abstract class ObjectFetcher {
     }
 
     public static InputStream fetchMayBeSecure(AwsConfig config, String bucket, String key) throws IOException {
-        String cmkId = fetchCmkId(config, bucket, key);
+        return fetchMayBeSecure(config, bucket, key, fetchObjectMetadata(config, bucket, key));
+    }
+
+    public static InputStream fetchMayBeSecure(AwsConfig config, String bucket, String key, ObjectMetadata metadata) throws IOException {
+        String cmkId = fetchCmkId(metadata);
         AmazonS3 client = (cmkId == null) ? createS3Client(config) : s3EncryptionClient(config, cmkId);
         return fetchObject(client, new GetObjectRequest(bucket, key)).getObjectContent();
     }
 
-    private static String fetchCmkId(AwsConfig config, String bucket, String key) throws IOException {
-        ObjectMetadata metadata = fetchObjectMetadata(config, bucket, key);
+    private static String fetchCmkId(ObjectMetadata metadata) throws IOException {
         String matDesc = metadata.getUserMetaDataOf("x-amz-matdesc");
         return matDesc == null ? null : reqdStr(readToMap(matDesc), "kms_cmk_id");
     }
