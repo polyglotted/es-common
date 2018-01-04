@@ -8,6 +8,8 @@ import com.amazonaws.services.s3.AmazonS3Encryption;
 import com.amazonaws.services.s3.AmazonS3EncryptionClient;
 import com.amazonaws.services.s3.model.CryptoConfiguration;
 import com.amazonaws.services.s3.model.KMSEncryptionMaterialsProvider;
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement;
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder;
 import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.AmazonSNSClientBuilder;
 import com.amazonaws.services.sqs.AmazonSQS;
@@ -62,6 +64,13 @@ public interface AwsConfig {
 
     static AmazonSNS createSnsClient(AwsConfig config) {
         return AmazonSNSClientBuilder.standard()
+            .withCredentials(CredsProvider.getProvider(config))
+            .withRegion(Regions.fromName(config.region()))
+            .build();
+    }
+
+    static AWSSimpleSystemsManagement createSsmClient(AwsConfig config) {
+        return AWSSimpleSystemsManagementClientBuilder.standard()
             .withCredentials(CredsProvider.getProvider(config))
             .withRegion(Regions.fromName(config.region()))
             .build();
