@@ -22,31 +22,36 @@ import static java.util.Objects.requireNonNull;
 @SuppressWarnings("unused")
 public class HighLevelConnector {
 
+    public static ElasticClient highLevelClient(SettingsHolder settingsHolder) { return highLevelClient(settingsHolder, "es"); }
+
     @SneakyThrows
-    public static ElasticClient highLevelClient(SettingsHolder settingsHolder) {
-        RestClientBuilder builder = RestClient.builder(buildHosts(settingsHolder))
-            .setMaxRetryTimeoutMillis(settingsHolder.intValue("es.max.retryTimeout.millis", 300_000));
-        setCredentials(settingsHolder, builder);
-        return (settingsHolder.booleanValue("es.sniffer.enabled", false)) ? sniffingClient(builder) : new EsRestClient(builder.build(), null);
+    public static ElasticClient highLevelClient(SettingsHolder settingsHolder, String prefix) {
+        RestClientBuilder builder = RestClient.builder(buildHosts(settingsHolder, prefix))
+            .setMaxRetryTimeoutMillis(settingsHolder.intValue(prefix + ".max.retryTimeout.millis", 300_000));
+        setCredentials(settingsHolder, builder, prefix);
+        return (settingsHolder.booleanValue(prefix + ".sniffer.enabled", false))
+            ? sniffingClient(builder) : new EsRestClient(builder.build(), null);
     }
 
     @SuppressWarnings("StaticPseudoFunctionalStyleMethod")
-    private static HttpHost[] buildHosts(SettingsHolder settingsHolder) {
-        int port = settingsHolder.intValue("es.http.port", 9200);
+    private static HttpHost[] buildHosts(SettingsHolder settingsHolder, String prefix) {
+        int port = settingsHolder.intValue(prefix + ".http.port", 9200);
+        String scheme = settingsHolder.stringValue(prefix + ".scheme", "http");
         Iterable<String> masterNodes = Splitter.on(",").omitEmptyStrings().trimResults().
-            split(settingsHolder.stringValue("es.master.nodes", "localhost"));
-        return toArray(transform(masterNodes, node -> new HttpHost(requireNonNull(node), port, "http")), HttpHost.class);
+            split(settingsHolder.stringValue(prefix + ".master.nodes", "localhost"));
+        return toArray(transform(masterNodes, node -> new HttpHost(requireNonNull(node), port, scheme)), HttpHost.class);
     }
 
-    private static void setCredentials(SettingsHolder settingsHolder, RestClientBuilder builder) {
-        String userName = settingsHolder.stringValue("es.auth.username", null);
-        String password = settingsHolder.stringValue("es.auth.password", null);
+    private static void setCredentials(SettingsHolder settingsHolder, RestClientBuilder builder, String prefix) {
+        String userName = settingsHolder.stringValue(prefix + ".auth.username", null);
+        String password = settingsHolder.stringValue(prefix + ".auth.password", null);
         if (nonNull(userName) && nonNull(password)) {
             final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
             credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(userName, password));
             builder.setHttpClientConfigCallback(callback -> callback.setDefaultCredentialsProvider(credentialsProvider));
         }
     }
+
     private static EsRestClient sniffingClient(RestClientBuilder builder) {
         SniffOnFailureListener sniffOnFailureListener = new SniffOnFailureListener();
         RestClient restClient = builder.setFailureListener(sniffOnFailureListener).build();
