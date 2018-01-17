@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.polyglotted</groupId>
     <artifactId>es-common</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.1.0</version>
     <name>Elastic Common</name>
 
     <description>Elastic and AWS Common Utils</description>
@@ -30,7 +30,7 @@
     <scm>
         <url>https://github.com/polyglotted/es-common</url>
         <developerConnection>scm:git:git@github.com:polyglotted/es-common.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v1.1.0</tag>
     </scm>
     <issueManagement>
         <system>GitHub Issue Management</system>
