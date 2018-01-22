@@ -37,6 +37,7 @@ import java.util.Set;
 import static io.polyglotted.common.es.ElasticException.checkState;
 import static io.polyglotted.common.es.ElasticException.handleEx;
 import static io.polyglotted.common.util.MapperUtil.readToMap;
+import static java.net.URLEncoder.encode;
 import static org.apache.http.HttpStatus.SC_MULTIPLE_CHOICES;
 import static org.apache.http.HttpStatus.SC_OK;
 
@@ -57,21 +58,27 @@ public class EsRestClient implements ElasticClient {
 
     @Override public Set<String> getIndices(String alias) {
         try {
-            Map<String, Object> responseObject = readToMap(performCliRequest("/" + alias + "/_aliases"));
+            Map<String, Object> responseObject = readToMap(performCliRequest("GET", "/" + alias + "/_aliases"));
             return ImmutableSet.copyOf(responseObject.keySet());
         } catch (Exception ioe) { throw handleEx("getIndices failed", ioe); }
     }
 
     @Override public String getIndexMeta(String... indices) {
-        try { return performCliRequest("/" + COMMA.join(indices) + "/"); } catch (Exception ioe) { throw handleEx("getIndexMeta failed", ioe); }
+        try {
+            return performCliRequest("GET", "/" + COMMA.join(indices) + "/");
+        } catch (Exception ioe) { throw handleEx("getIndexMeta failed", ioe); }
     }
 
     @Override public String getSettings(String... indices) {
-        try { return performCliRequest("/" + COMMA.join(indices) + "/_settings"); } catch (Exception e) { throw handleEx("getSettings failed", e); }
+        try {
+            return performCliRequest("GET", "/" + COMMA.join(indices) + "/_settings");
+        } catch (Exception e) { throw handleEx("getSettings failed", e); }
     }
 
     @Override public String getMapping(String index, String type) {
-        try { return performCliRequest("/" + index + "/" + type + "/_mapping"); } catch (Exception e) { throw handleEx("getSettings failed", e); }
+        try {
+            return performCliRequest("GET", "/" + index + "/" + type + "/_mapping");
+        } catch (Exception e) { throw handleEx("getSettings failed", e); }
     }
 
     @Override public void createIndex(CreateIndexRequest request) { throw new UnsupportedOperationException(); }
@@ -82,7 +89,11 @@ public class EsRestClient implements ElasticClient {
 
     @Override public void putMapping(PutMappingRequest request) { throw new UnsupportedOperationException(); }
 
-    @Override public void forceRefresh(String... indices) { throw new UnsupportedOperationException(); }
+    @Override public void forceRefresh(String... indices) {
+        try {
+            performCliRequest("POST", "/" + COMMA.join(indices) + "/_refresh");
+        } catch (Exception ioe) { throw handleEx("forceRefresh failed", ioe); }
+    }
 
     @Override public void dropIndex(String... indices) { throw new UnsupportedOperationException(); }
 
@@ -90,7 +101,7 @@ public class EsRestClient implements ElasticClient {
 
     @Override public Map<String, Object> clusterHealth() {
         try {
-            return readToMap(performCliRequest("/_cluster/health"));
+            return readToMap(performCliRequest("GET", "/_cluster/health"));
         } catch (Exception ioe) { throw handleEx("clusterHealth failed", ioe); }
     }
 
@@ -119,7 +130,9 @@ public class EsRestClient implements ElasticClient {
     }
 
     @Override public GetResponse get(GetRequest request) {
-        try { return internalClient.get(request); } catch (IOException ioe) { throw new ElasticException("get failed", ioe); }
+        try {
+            return internalClient.get(request.id(encode(request.id(), "utf-8")));
+        } catch (IOException ioe) { throw new ElasticException("get failed", ioe); }
     }
 
     @Override public MultiGetResponse multiGet(MultiGetRequest request) { throw new UnsupportedOperationException(); }
@@ -136,8 +149,8 @@ public class EsRestClient implements ElasticClient {
         try { return internalClient.clearScroll(request); } catch (IOException ioe) { throw new ElasticException("clearScroll failed", ioe); }
     }
 
-    private String performCliRequest(String endpoint) throws IOException {
-        Response response = restClient.performRequest("GET", endpoint);
+    private String performCliRequest(String method, String endpoint) throws IOException {
+        Response response = restClient.performRequest(method, endpoint);
         int statusCode = response.getStatusLine().getStatusCode();
         checkState(statusCode >= SC_OK && statusCode < SC_MULTIPLE_CHOICES, response.getStatusLine().getReasonPhrase());
         return EntityUtils.toString(response.getEntity());
