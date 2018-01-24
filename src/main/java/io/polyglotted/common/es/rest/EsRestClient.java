@@ -37,7 +37,6 @@ import java.util.Set;
 import static io.polyglotted.common.es.ElasticException.checkState;
 import static io.polyglotted.common.es.ElasticException.handleEx;
 import static io.polyglotted.common.util.MapperUtil.readToMap;
-import static java.net.URLEncoder.encode;
 import static org.apache.http.HttpStatus.SC_MULTIPLE_CHOICES;
 import static org.apache.http.HttpStatus.SC_OK;
 
@@ -130,9 +129,7 @@ public class EsRestClient implements ElasticClient {
     }
 
     @Override public GetResponse get(GetRequest request) {
-        try {
-            return internalClient.get(request.id(encode(request.id(), "utf-8")));
-        } catch (IOException ioe) { throw new ElasticException("get failed", ioe); }
+        try { return internalClient.get(request); } catch (IOException ioe) { throw new ElasticException("get failed", ioe); }
     }
 
     @Override public MultiGetResponse multiGet(MultiGetRequest request) { throw new UnsupportedOperationException(); }
