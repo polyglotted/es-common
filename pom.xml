@@ -98,7 +98,7 @@
         <spatial4j.version>0.6</spatial4j.version>
         <jts.version>1.13</jts.version>
         <elasticsearch.version>5.6.4</elasticsearch.version>
-        <awsjavasdk.version>1.11.269</awsjavasdk.version>
+        <awsjavasdk.version>1.11.280</awsjavasdk.version>
         <spring.version>5.0.3.RELEASE</spring.version>
         <!-- plugin deps -->
         <enforcer.plugin.version>3.0.0-M1</enforcer.plugin.version>
@@ -782,6 +782,21 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-cognitoidp</artifactId>
+                <version>${awsjavasdk.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.amazonaws</groupId>
+                        <artifactId>aws-java-sdk-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.amazonaws</groupId>
+                        <artifactId>jmespath-java</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
 
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -1138,6 +1153,10 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-cloudwatchmetrics</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-cognitoidp</artifactId>
         </dependency>
 
         <dependency>
