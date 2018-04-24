@@ -29,6 +29,7 @@ import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.sniff.Sniffer;
+import org.elasticsearch.index.query.QueryBuilder;
 
 import java.io.IOException;
 import java.util.Map;
@@ -145,6 +146,8 @@ public class EsRestClient implements ElasticClient {
     @Override public ClearScrollResponse clearScroll(ClearScrollRequest request) {
         try { return internalClient.clearScroll(request); } catch (IOException ioe) { throw new ElasticException("clearScroll failed", ioe); }
     }
+
+    @Override public long deleteByQuery(String index, QueryBuilder query) { throw new UnsupportedOperationException(); }
 
     private String performCliRequest(String method, String endpoint) throws IOException {
         Response response = restClient.performRequest(method, endpoint);

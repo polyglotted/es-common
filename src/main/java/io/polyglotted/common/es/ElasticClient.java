@@ -18,6 +18,7 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.*;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
+import org.elasticsearch.index.query.QueryBuilder;
 
 import java.util.Map;
 import java.util.Set;
@@ -76,4 +77,6 @@ public interface ElasticClient extends AutoCloseable {
     SearchResponse searchScroll(SearchScrollRequest request);
 
     ClearScrollResponse clearScroll(ClearScrollRequest request);
+
+    long deleteByQuery(String index, QueryBuilder query);
 }

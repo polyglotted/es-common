@@ -24,7 +24,11 @@ import org.elasticsearch.action.get.MultiGetRequest;
 import org.elasticsearch.action.get.MultiGetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.search.*;
+import org.elasticsearch.action.search.ClearScrollRequest;
+import org.elasticsearch.action.search.ClearScrollResponse;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
@@ -38,9 +42,16 @@ import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.reindex.DeleteByQueryAction;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import static io.polyglotted.common.es.ElasticException.checkState;
 import static io.polyglotted.common.es.ElasticException.handleEx;
@@ -274,5 +285,11 @@ public class EsTransportClient implements ElasticClient {
 
     @Override public ClearScrollResponse clearScroll(ClearScrollRequest request) {
         try { return internalClient.clearScroll(request).actionGet(); } catch (Exception ex) { throw handleEx("clearScroll failed", ex); }
+    }
+
+    @Override public long deleteByQuery(String index, QueryBuilder query) {
+        try {
+            return DeleteByQueryAction.INSTANCE.newRequestBuilder(internalClient).source(index).filter(query).get().getDeleted();
+        } catch (Exception ex) { throw handleEx("clearScroll failed", ex); }
     }
 }
