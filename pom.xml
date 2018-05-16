@@ -97,7 +97,7 @@
         <joda.version>2.9.9</joda.version>
         <spatial4j.version>0.6</spatial4j.version>
         <jts.version>1.13</jts.version>
-        <elasticsearch.version>5.6.4</elasticsearch.version>
+        <elasticsearch.version>5.6.9</elasticsearch.version>
         <awsjavasdk.version>1.11.280</awsjavasdk.version>
         <spring.version>5.0.3.RELEASE</spring.version>
         <!-- plugin deps -->

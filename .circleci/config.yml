@@ -7,7 +7,7 @@ jobs:
     environment:
       MAVEN_OPTS: -Xmx3200m
       artifact_dir: "tmp/artifacts"
-      es_version: "5.6.4"
+      es_version: "5.6.9"
 
     steps:
       - checkout
