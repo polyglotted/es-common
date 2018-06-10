@@ -74,6 +74,8 @@ public interface ElasticClient extends AutoCloseable {
 
     SearchResponse search(SearchRequest request);
 
+    MultiSearchResponse multiSearch(MultiSearchRequest request);
+
     SearchResponse searchScroll(SearchScrollRequest request);
 
     ClearScrollResponse clearScroll(ClearScrollRequest request);

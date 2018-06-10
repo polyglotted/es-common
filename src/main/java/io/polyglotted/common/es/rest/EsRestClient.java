@@ -139,6 +139,8 @@ public class EsRestClient implements ElasticClient {
         try { return internalClient.search(request); } catch (IOException ioe) { throw new ElasticException("search failed", ioe); }
     }
 
+    @Override public MultiSearchResponse multiSearch(MultiSearchRequest request) { throw new UnsupportedOperationException(); }
+
     @Override public SearchResponse searchScroll(SearchScrollRequest request) {
         try { return internalClient.searchScroll(request); } catch (IOException ioe) { throw new ElasticException("searchScroll failed", ioe); }
     }

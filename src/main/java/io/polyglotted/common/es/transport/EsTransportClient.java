@@ -26,6 +26,8 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.ClearScrollRequest;
 import org.elasticsearch.action.search.ClearScrollResponse;
+import org.elasticsearch.action.search.MultiSearchRequest;
+import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
@@ -277,6 +279,10 @@ public class EsTransportClient implements ElasticClient {
 
     @Override public SearchResponse search(SearchRequest request) {
         try { return internalClient.search(request).actionGet(); } catch (Exception ex) { throw handleEx("search failed", ex); }
+    }
+
+    @Override public MultiSearchResponse multiSearch(MultiSearchRequest request) {
+        try { return internalClient.multiSearch(request).actionGet(); } catch (Exception ex) { throw handleEx("multiSearch failed", ex); }
     }
 
     @Override public SearchResponse searchScroll(SearchScrollRequest request) {
