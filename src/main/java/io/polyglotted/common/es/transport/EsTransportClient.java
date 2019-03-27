@@ -162,6 +162,20 @@ public class EsTransportClient implements ElasticClient {
         return null;
     }
 
+    @Override public void openIndex(String... indices) {
+        try {
+            checkState(internalClient.admin().indices().prepareOpen(indices).execute().actionGet().isAcknowledged(),
+                "unable to open " + Arrays.toString(indices));
+        } catch (Exception ex) { throw handleEx("openIndex failed", ex); }
+    }
+
+    @Override public void closeIndex(String... indices) {
+        try {
+            checkState(internalClient.admin().indices().prepareClose(indices).execute().actionGet().isAcknowledged(),
+                "unable to open " + Arrays.toString(indices));
+        } catch (Exception ex) { throw handleEx("openIndex failed", ex); }
+    }
+
     private MetaData getMeta(String... indices) {
         try {
             return internalClient.admin().cluster().prepareState().setIndices(indices).execute().actionGet().getState().metaData();

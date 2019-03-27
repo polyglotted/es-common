@@ -81,6 +81,10 @@ public class EsRestClient implements ElasticClient {
         } catch (Exception e) { throw handleEx("getSettings failed", e); }
     }
 
+    @Override public void openIndex(String... indices) { throw new UnsupportedOperationException(); }
+
+    @Override public void closeIndex(String... indices) { throw new UnsupportedOperationException(); }
+
     @Override public void createIndex(CreateIndexRequest request) { throw new UnsupportedOperationException(); }
 
     @Override public void updateAlias(IndicesAliasesRequest request) { throw new UnsupportedOperationException(); }
