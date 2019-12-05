@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.polyglotted</groupId>
     <artifactId>es-common</artifactId>
-    <version>1.1.10-SNAPSHOT</version>
+    <version>1.2.0-SNAPSHOT</version>
     <name>Elastic Common</name>
 
     <description>Elastic and AWS Common Utils</description>
@@ -78,27 +78,27 @@
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ssZ</maven.build.timestamp.format>
         <gpg.executable>gpg2</gpg.executable>
         <!-- provided deps -->
-        <lombok.version>1.16.20</lombok.version>
-        <slf4j.version>1.7.25</slf4j.version>
-        <jcommander.version>1.72</jcommander.version>
-        <commonscodec.version>1.11</commonscodec.version>
-        <guava.version>23.6-jre</guava.version>
+        <lombok.version>1.18.10</lombok.version>
+        <slf4j.version>1.7.29</slf4j.version>
+        <jcommander.version>1.78</jcommander.version>
+        <commonscodec.version>1.13</commonscodec.version>
+        <guava.version>28.1-jre</guava.version>
         <hamcrest.version>1.3</hamcrest.version>
         <testng.version>6.13.1</testng.version>
         <!-- main deps -->
-        <log4j.version>2.10.0</log4j.version>
+        <log4j.version>2.12.1</log4j.version>
         <base64.version>2.3.9</base64.version>
-        <jasypt.version>1.9.2</jasypt.version>
-        <typesafe.version>1.3.2</typesafe.version>
-        <jackson.version>2.9.8</jackson.version>
-        <httpclient.version>4.5.5</httpclient.version>
-        <httpcore.version>4.4.9</httpcore.version>
-        <httpasync.version>4.1.3</httpasync.version>
-        <joda.version>2.9.9</joda.version>
+        <jasypt.version>1.9.3</jasypt.version>
+        <typesafe.version>1.4.0</typesafe.version>
+        <jackson.version>2.10.1</jackson.version>
+        <httpclient.version>4.5.10</httpclient.version>
+        <httpcore.version>4.4.12</httpcore.version>
+        <httpasync.version>4.1.4</httpasync.version>
+        <joda.version>2.10.5</joda.version>
         <spatial4j.version>0.6</spatial4j.version>
         <jts.version>1.13</jts.version>
-        <elasticsearch.version>5.6.9</elasticsearch.version>
-        <awsjavasdk.version>1.11.438</awsjavasdk.version>
+        <elasticsearch.version>5.6.16</elasticsearch.version>
+        <awsjavasdk.version>1.11.638</awsjavasdk.version>
         <spring.version>5.0.10.RELEASE</spring.version>
         <!-- plugin deps -->
         <enforcer.plugin.version>3.0.0-M1</enforcer.plugin.version>
