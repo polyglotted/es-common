@@ -44,6 +44,8 @@ public interface ElasticClient extends AutoCloseable {
 
     void createIndex(CreateIndexRequest request);
 
+    void createIndex(String index, String resource);
+
     void updateAlias(IndicesAliasesRequest request);
 
     void updateSettings(UpdateSettingsRequest request);
@@ -85,4 +87,12 @@ public interface ElasticClient extends AutoCloseable {
     ClearScrollResponse clearScroll(ClearScrollRequest request);
 
     long deleteByQuery(String index, QueryBuilder query);
+
+    String simpleGet(String endpoint, String methodName);
+
+    String simplePost(String endpoint, String body, String methodName);
+
+    String simplePut(String endpoint, String body, String methodName);
+
+    void simpleDelete(String endpoint, String methodName);
 }

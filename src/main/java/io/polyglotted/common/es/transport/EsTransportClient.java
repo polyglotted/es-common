@@ -188,6 +188,10 @@ public class EsTransportClient implements ElasticClient {
         } catch (Exception ex) { throw handleEx("createIndex failed", ex); }
     }
 
+    @Override public void createIndex(String index, String resource) {
+        createIndex(new CreateIndexRequest(index).source(resource, JSON));
+    }
+
     @Override public void updateAlias(IndicesAliasesRequest request) {
         try {
             checkState(internalClient.admin().indices().aliases(request).actionGet().isAcknowledged(), "unable to update aliases");
@@ -311,5 +315,21 @@ public class EsTransportClient implements ElasticClient {
         try {
             return DeleteByQueryAction.INSTANCE.newRequestBuilder(internalClient).source(index).filter(query).get().getDeleted();
         } catch (Exception ex) { throw handleEx("clearScroll failed", ex); }
+    }
+
+    @Override public String simpleGet(String endpoint, String methodName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override public String simplePost(String endpoint, String body, String methodName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override public String simplePut(String endpoint, String body, String methodName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override public void simpleDelete(String endpoint, String methodName) {
+        throw new UnsupportedOperationException();
     }
 }
