@@ -1,6 +1,6 @@
 package io.polyglotted.common.es;
 
-import io.polyglotted.applauncher.settings.SettingsHolder;
+import io.polyglotted.common.config.SettingsHolder;
 import io.polyglotted.common.es.transport.EsTransportClient;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;

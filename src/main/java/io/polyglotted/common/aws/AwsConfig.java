@@ -14,8 +14,8 @@ import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.AmazonSNSClientBuilder;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
-import io.polyglotted.applauncher.settings.Attribute;
-import io.polyglotted.applauncher.settings.Settings;
+import io.polyglotted.common.config.Attribute;
+import io.polyglotted.common.config.Settings;
 
 @Settings
 @SuppressWarnings("unused")

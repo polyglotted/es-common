@@ -1,7 +1,7 @@
 package io.polyglotted.applauncher.test.server;
 
 import io.polyglotted.applauncher.server.Main;
-import io.polyglotted.applauncher.settings.Attribute;
+import io.polyglotted.common.config.Attribute;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

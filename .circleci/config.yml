@@ -2,73 +2,83 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/openjdk:8u171-jdk-stretch
+      - image: circleci/openjdk:8u181
+      - image: polyglotted/esdocker:5.6.16-1
+        environment:
+          ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+          bootstrap.memory_lock: false
+          transport.host: "0.0.0.0"
+          cluster.name: "abaci-integration"
     working_directory: ~/es-common
     environment:
-      MAVEN_OPTS: -Xmx3200m
-      artifact_dir: "tmp/artifacts"
-      es_version: "5.6.9"
-
+      GRADLE_OPTS: -Xmx3200m
+      artifact_dir: "artifacts"
     steps:
       - checkout
       - run:
-          name: Setup Build Variables
-          command: echo 'export COMMIT_MESSAGE="$(git log --format=oneline -n 1 $CIRCLE_SHA1)"' >> $BASH_ENV
-
-      - run:
-          name: Install GnuPg if not already
-          command: sudo apt-get install gnupg2 -y
-
-      - run:
-          name: Import GPG Keys
-          command: curl ${GPG_OUT} -o private.key && gpg2 --allow-secret-key-import --import private.key
-
+          name: Setup GPG and Gradle Props
+          command: |
+            sudo apt-get update && sudo apt-get install gettext gnupg2 python3-pip -y && sudo pip3 install awscli
+            aws s3 cp s3://artifacts.abaci.co/.gnupg/pgpout.asc ~/private.key
+            gpg2 --allow-secret-key-import --import ~/private.key
+            gpg2 --export-secret-key ${GPG_KEYID} > secring.gpg
+            envsubst < "gradle.properties.tpl" > "gradle.properties"
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "pom.xml" }}
-          - v1-dependencies-
+            - v1-dependencies-{{ checksum "build.gradle" }}
+            - v1-dependencies-
       - run:
-          name: Install Maven Dependencies
-          command: mvn --settings .ci-settings.xml -Pemma-coverage -DskipIntegTests install
+          name: Gradle Check
+          command: ./gradlew --warning-mode=all -PprojVersion=latest check
       - save_cache:
           paths:
-            - ~/.m2
-          key: v1-dependencies-{{ checksum "pom.xml" }}
-
-      - restore_cache:
-          keys:
-          - v1-binaries-{{ checksum ".circleci/config.yml" }}
-          - v1-binaries-
-      - run:
-          name: Start ES Cluster
-          command: .circleci/es-start.sh
-      - save_cache:
-          paths:
-            - elasticsearch-${es_version}
-          key: v1-binaries-{{ checksum ".circleci/config.yml" }}
-
-      - run:
-          name: Maven Verify
-          command: mvn --settings .ci-settings.xml -Pemma-coverage -Dassembly.skipAssembly=true verify
-      - run:
-          name: Stop Elastic Docker
-          command: kill -9 `cat es-pid.txt`
-
+            - ~/.gradle
+          key: v1-dependencies-{{ checksum "build.gradle" }}
       - run:
           name: Collect Test Artifacts
           command: |
-            mkdir -p ${artifact_dir}/unit-test/ ${artifact_dir}/integration/
-            find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ${artifact_dir}/unit-test/ \;
-            find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} ${artifact_dir}/integration/ \;
+            mkdir -p ${artifact_dir}/reports/ ${artifact_dir}/output/
+            cp -r build/reports ${artifact_dir}/
           when: always
       - store_artifacts:
-          path: tmp/artifacts
+          path: artifacts
 
-      - deploy:
-          name: Maven Deploy
+  deploy:
+    docker:
+      - image: circleci/openjdk:8u181
+    working_directory: ~/es-common
+    environment:
+      GRADLE_OPTS: -Xmx3200m
+    steps:
+      - checkout
+      - run:
+          name: Setup GPG and Gradle Props
           command: |
-            if [[ ${COMMIT_MESSAGE} == *"prepare for release"* ]]; then
-                git config user.email "circleci@polyglotted.io"
-                git config user.name "CircleCI"
-                mvn --settings .ci-settings.xml --batch-mode release:prepare release:perform
-            fi
+            sudo apt-get update && sudo apt-get install gettext gnupg2 python3-pip -y && sudo pip3 install awscli
+            aws s3 cp s3://artifacts.abaci.co/.gnupg/pgpout.asc ~/private.key
+            gpg2 --allow-secret-key-import --import ~/private.key
+            gpg2 --export-secret-key ${GPG_KEYID} > secring.gpg
+            envsubst < "gradle.properties.tpl" > "gradle.properties"
+      - run:
+          name: Gradle Deploy
+          command: |
+            ./gradlew --warning-mode=none -PprojVersion=${CIRCLE_TAG:1} uploadArchives
+
+workflows:
+  version: 2
+  build-n-deploy:
+    jobs:
+      - build:
+          context: org-global
+          filters:
+            tags:
+              only: /.*/
+      - deploy:
+          context: org-global
+          requires:
+            - build
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+).*/
+            branches:
+              ignore: /.*/

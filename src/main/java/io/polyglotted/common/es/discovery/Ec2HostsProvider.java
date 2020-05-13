@@ -4,7 +4,7 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.http.IdleConnectionReaper;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
-import io.polyglotted.applauncher.settings.SettingsHolder;
+import io.polyglotted.common.config.SettingsHolder;
 import io.polyglotted.common.es.discovery.Ec2Service.DISCOVERY_EC2;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.common.settings.Settings;
