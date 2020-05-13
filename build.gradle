@@ -22,16 +22,57 @@ repositories {
 }
 
 ext {
+    awsVersion = '1.11.781'
     elasticVersion = '5.6.16'
     lombokVersion = '1.18.10'
+    luceneVersion = '6.6.1'
     netty3Version = '3.10.6.Final'
     netty4Version = '4.1.13.Final'
+    poiVersion = '3.17'
+    springVersion = '5.2.6.RELEASE'
+    thymeleafVersion = '3.0.9.RELEASE'
     utilsCommonVersion = '2020.05.1'
 }
 dependencies {
     compileOnly group: 'org.projectlombok', name: 'lombok', version: "${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
     compileOnly group: 'io.polyglotted', name: 'utils-common', version: "${utilsCommonVersion}"
+
+    compile group: 'com.carrotsearch', name: 'hppc', version: '0.7.1'
+    compile group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.9.3'
+    compile group: 'com.github.virtuald', name: 'curvesapi', version: '1.04'
+    compile group: 'com.tdunning', name: 't-digest', version: '3.0'
+    compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
+    compile group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '5.0.2'
+    compile group: 'org.attoparser', name: 'attoparser', version: '2.0.4.RELEASE'
+    compile group: 'org.elasticsearch', name: 'securesm', version: '1.2'
+    compile group: 'org.elasticsearch', name: 'jna', version: '4.4.0-1'
+    compile group: 'org.hdrhistogram', name: 'HdrHistogram', version: '2.1.9'
+    compile group: 'org.javassist', name: 'javassist', version: '3.20.0-GA'
+    compile group: 'org.locationtech.spatial4j', name: 'spatial4j', version: '0.6'
+    compile group: 'org.unbescape', name: 'unbescape', version: '1.1.5.RELEASE'
+    compile group: 'software.amazon.ion', name: 'ion-java', version: '1.0.2'
+    compile group: 'stax', name: 'stax-api', version: '1.0.1'
+
+    compile(group: 'ognl', name: 'ognl', version: '3.1.12') {
+        exclude(module: 'javassist')
+    }
+    compile(group: 'org.apache.xmlbeans', name: 'xmlbeans', version: '2.6.0') {
+        exclude(module: 'stax-api')
+    }
+    compile("org.apache.poi:poi:${poiVersion}") {
+        exclude(module: 'commons-codec')
+        exclude(module: 'commons-collections4')
+    }
+    compile("org.apache.poi:poi-ooxml-schemas:${poiVersion}") {
+        exclude(module: 'poi')
+        exclude(module: 'xmlbeans')
+    }
+    compile("org.apache.poi:poi-ooxml:${poiVersion}") {
+        exclude(module: 'poi')
+        exclude(module: 'poi-ooxml-schemas')
+        exclude(module: 'curvesapi')
+    }
 
     compile group: 'io.netty', name: 'netty', version: "${netty3Version}"
     compile group: 'io.netty', name: 'netty-common', version: "${netty4Version}"
@@ -42,7 +83,7 @@ dependencies {
         exclude(module: 'netty-common')
     }
     compile(group: 'io.netty', name: 'netty-transport', version: "${netty4Version}") {
-        exclude(group: 'io.netty', module: 'netty-buffer')
+        exclude(module: 'netty-buffer')
         exclude(module: 'netty-resolver')
     }
     compile(group: 'io.netty', name: 'netty-codec', version: "${netty4Version}") {
@@ -56,72 +97,63 @@ dependencies {
         exclude(module: 'netty-transport')
         exclude(module: 'netty-codec')
     }
-    compile group: 'org.locationtech.spatial4j', name: 'spatial4j', version: '0.6'
-    compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
-    compile group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.9.3'
-    compile group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '5.0.2'
-    compile group: 'com.carrotsearch', name: 'hppc', version: '0.7.1'
-    compile group: 'com.tdunning', name: 't-digest', version: '3.0'
-    compile group: 'org.hdrhistogram', name: 'HdrHistogram', version: '2.1.9'
-    compile group: 'org.elasticsearch', name: 'securesm', version: '1.2'
-    compile group: 'org.elasticsearch', name: 'jna', version: '4.4.0-1'
-    compile group: 'org.apache.lucene', name: 'lucene-core', version: '6.6.1'
-    compile(group: 'org.apache.lucene', name: 'lucene-analyzers-common', version: '6.6.1') {
+    compile group: 'org.apache.lucene', name: 'lucene-core', version: "${luceneVersion}"
+    compile(group: 'org.apache.lucene', name: 'lucene-analyzers-common', version: "${luceneVersion}") {
         exclude(module: 'lucene-core')
     }
-    compile(group: 'org.apache.lucene', name: 'lucene-backward-codecs', version: '6.6.1') {
+    compile(group: 'org.apache.lucene', name: 'lucene-backward-codecs', version: "${luceneVersion}") {
         exclude(module: 'lucene-core')
     }
-    compile(group: 'org.apache.lucene', name: 'lucene-grouping', version: '6.6.1') {
+    compile(group: 'org.apache.lucene', name: 'lucene-grouping', version: "${luceneVersion}") {
         exclude(module: 'lucene-core')
         exclude(module: 'lucene-queries')
     }
-    compile(group: 'org.apache.lucene', name: 'lucene-highlighter', version: '6.6.1') {
+    compile(group: 'org.apache.lucene', name: 'lucene-highlighter', version: "${luceneVersion}") {
         exclude(module: 'lucene-core')
         exclude(module: 'lucene-analyzers-common')
         exclude(module: 'lucene-queries')
         exclude(module: 'lucene-join')
         exclude(module: 'lucene-memory')
     }
-    compile(group: 'org.apache.lucene', name: 'lucene-join', version: '6.6.1') {
+    compile(group: 'org.apache.lucene', name: 'lucene-join', version: "${luceneVersion}") {
         exclude(module: 'lucene-core')
     }
-    compile(group: 'org.apache.lucene', name: 'lucene-memory', version: '6.6.1') {
+    compile(group: 'org.apache.lucene', name: 'lucene-memory', version: "${luceneVersion}") {
         exclude(module: 'lucene-core')
     }
-    compile(group: 'org.apache.lucene', name: 'lucene-misc', version: '6.6.1') {
+    compile(group: 'org.apache.lucene', name: 'lucene-misc', version: "${luceneVersion}") {
         exclude(module: 'lucene-core')
     }
-    compile(group: 'org.apache.lucene', name: 'lucene-queries', version: '6.6.1') {
+    compile(group: 'org.apache.lucene', name: 'lucene-queries', version: "${luceneVersion}") {
         exclude(module: 'lucene-core')
     }
-    compile(group: 'org.apache.lucene', name: 'lucene-queryparser', version: '6.6.1') {
+    compile(group: 'org.apache.lucene', name: 'lucene-queryparser', version: "${luceneVersion}") {
         exclude(module: 'lucene-core')
         exclude(module: 'lucene-queries')
         exclude(module: 'lucene-sandbox')
     }
-    compile(group: 'org.apache.lucene', name: 'lucene-sandbox', version: '6.6.1') {
+    compile(group: 'org.apache.lucene', name: 'lucene-sandbox', version: "${luceneVersion}") {
         exclude(module: 'lucene-core')
     }
-    compile(group: 'org.apache.lucene', name: 'lucene-spatial', version: '6.6.1') {
+    compile(group: 'org.apache.lucene', name: 'lucene-spatial', version: "${luceneVersion}") {
         exclude(module: 'lucene-core')
     }
-    compile(group: 'org.apache.lucene', name: 'lucene-spatial3d', version: '6.6.1') {
+    compile(group: 'org.apache.lucene', name: 'lucene-spatial3d', version: "${luceneVersion}") {
         exclude(module: 'lucene-core')
     }
-    compile(group: 'org.apache.lucene', name: 'lucene-spatial-extras', version: '6.6.1') {
+    compile(group: 'org.apache.lucene', name: 'lucene-spatial-extras', version: "${luceneVersion}") {
         exclude(module: 'lucene-core')
         exclude(module: 'lucene-queries')
         exclude(module: 'lucene-misc')
         exclude(module: 'lucene-spatial3d')
         exclude(module: 'spatial4j')
     }
-    compile(group: 'org.apache.lucene', name: 'lucene-suggest', version: '6.6.1') {
+    compile(group: 'org.apache.lucene', name: 'lucene-suggest', version: "${luceneVersion}") {
         exclude(module: 'lucene-core')
         exclude(module: 'lucene-analyzers-common')
         exclude(module: 'lucene-queries')
     }
-    compile(group: 'org.elasticsearch', name: 'elasticsearch', version: '5.6.16') {
+    compile(group: 'org.elasticsearch', name: 'elasticsearch', version: "${elasticVersion}") {
         exclude(module: 'log4j-api')
         exclude(module: 'jackson-core')
         exclude(module: 'jackson-dataformat-smile')
@@ -151,7 +183,7 @@ dependencies {
         exclude(module: 'lucene-spatial3d')
         exclude(module: 'lucene-suggest')
     }
-    compile(group: 'org.elasticsearch.plugin', name: 'transport-netty3-client', version: '5.6.16') {
+    compile(group: 'org.elasticsearch.plugin', name: 'transport-netty3-client', version: "${elasticVersion}") {
         exclude(module: 'jts')
         exclude(module: 'log4j-api')
         exclude(module: 'log4j-core')
@@ -160,7 +192,7 @@ dependencies {
         exclude(module: 'spatial4j')
         exclude(module: 'netty')
     }
-    compile(group: 'org.elasticsearch.plugin', name: 'transport-netty4-client', version: '5.6.16') {
+    compile(group: 'org.elasticsearch.plugin', name: 'transport-netty4-client', version: "${elasticVersion}") {
         exclude(module: 'jts')
         exclude(module: 'log4j-api')
         exclude(module: 'log4j-core')
@@ -175,7 +207,7 @@ dependencies {
         exclude(module: 'netty-codec-http')
         exclude(module: 'netty-handler')
     }
-    compile(group: 'org.elasticsearch.plugin', name: 'lang-mustache-client', version: '5.6.16') {
+    compile(group: 'org.elasticsearch.plugin', name: 'lang-mustache-client', version: "${elasticVersion}") {
         exclude(module: 'jts')
         exclude(module: 'log4j-api')
         exclude(module: 'log4j-core')
@@ -184,7 +216,7 @@ dependencies {
         exclude(module: 'spatial4j')
         exclude(module: 'compiler')
     }
-    compile(group: 'org.elasticsearch.plugin', name: 'percolator-client', version: '5.6.16') {
+    compile(group: 'org.elasticsearch.plugin', name: 'percolator-client', version: "${elasticVersion}") {
         exclude(module: 'jts')
         exclude(module: 'log4j-api')
         exclude(module: 'log4j-core')
@@ -192,7 +224,7 @@ dependencies {
         exclude(module: 'jna')
         exclude(module: 'spatial4j')
     }
-    compile(group: 'org.elasticsearch.plugin', name: 'reindex-client', version: '5.6.16') {
+    compile(group: 'org.elasticsearch.plugin', name: 'reindex-client', version: "${elasticVersion}") {
         exclude(module: 'jts')
         exclude(module: 'log4j-api')
         exclude(module: 'log4j-core')
@@ -201,7 +233,7 @@ dependencies {
         exclude(module: 'spatial4j')
         exclude(module: 'elasticsearch-rest-client')
     }
-    compile(group: 'org.elasticsearch.plugin', name: 'parent-join-client', version: '5.6.16') {
+    compile(group: 'org.elasticsearch.plugin', name: 'parent-join-client', version: "${elasticVersion}") {
         exclude(module: 'jts')
         exclude(module: 'log4j-api')
         exclude(module: 'log4j-core')
@@ -209,7 +241,7 @@ dependencies {
         exclude(module: 'jna')
         exclude(module: 'spatial4j')
     }
-    compile(group: 'org.elasticsearch.plugin', name: 'aggs-matrix-stats-client', version: '5.6.16') {
+    compile(group: 'org.elasticsearch.plugin', name: 'aggs-matrix-stats-client', version: "${elasticVersion}") {
         exclude(module: 'jts')
         exclude(module: 'log4j-api')
         exclude(module: 'log4j-core')
@@ -217,7 +249,7 @@ dependencies {
         exclude(module: 'jna')
         exclude(module: 'spatial4j')
     }
-    compile(group: 'org.elasticsearch.client', name: 'elasticsearch-rest-client', version: '5.6.16') {
+    compile(group: 'org.elasticsearch.client', name: 'elasticsearch-rest-client', version: "${elasticVersion}") {
         exclude(module: 'httpcore')
         exclude(module: 'httpcore-nio')
         exclude(module: 'httpclient')
@@ -225,7 +257,7 @@ dependencies {
         exclude(module: 'commons-logging')
         exclude(module: 'commons-codec')
     }
-    compile(group: 'org.elasticsearch.client', name: 'transport', version: '5.6.16') {
+    compile(group: 'org.elasticsearch.client', name: 'transport', version: "${elasticVersion}") {
         exclude(module: 'elasticsearch')
         exclude(module: 'transport-netty3-client')
         exclude(module: 'transport-netty4-client')
@@ -234,13 +266,13 @@ dependencies {
         exclude(module: 'reindex-client')
         exclude(module: 'parent-join-client')
     }
-    compile(group: 'org.elasticsearch.client', name: 'elasticsearch-rest-high-level-client', version: '5.6.16') {
+    compile(group: 'org.elasticsearch.client', name: 'elasticsearch-rest-high-level-client', version: "${elasticVersion}") {
         exclude(module: 'elasticsearch')
         exclude(module: 'elasticsearch-rest-client')
         exclude(module: 'parent-join-client')
         exclude(module: 'aggs-matrix-stats-client')
     }
-    compile(group: 'org.elasticsearch.client', name: 'elasticsearch-rest-client-sniffer', version: '5.6.16') {
+    compile(group: 'org.elasticsearch.client', name: 'elasticsearch-rest-client-sniffer', version: "${elasticVersion}") {
         exclude(module: 'httpcore')
         exclude(module: 'httpclient')
         exclude(module: 'commons-logging')
@@ -248,8 +280,7 @@ dependencies {
         exclude(module: 'elasticsearch-rest-client')
         exclude(module: 'jackson-core')
     }
-    compile group: 'software.amazon.ion', name: 'ion-java', version: '1.0.2'
-    compile(group: 'com.amazonaws', name: 'aws-java-sdk-core', version: '1.11.781') {
+    compile(group: 'com.amazonaws', name: 'aws-java-sdk-core', version: "${awsVersion}") {
         exclude(module: 'ion-java')
         exclude(module: 'commons-logging')
         exclude(module: 'joda-time')
@@ -257,98 +288,108 @@ dependencies {
         exclude(module: 'jackson-databind')
         exclude(module: 'jackson-dataformat-cbor')
     }
-    compile(group: 'com.amazonaws', name: 'jmespath-java', version: '1.11.781') {
+    compile(group: 'com.amazonaws', name: 'jmespath-java', version: "${awsVersion}") {
         exclude(module: 'jackson-databind')
     }
-    compile(group: 'com.amazonaws', name: 'aws-java-sdk-kms', version: '1.11.781') {
+    compile(group: 'com.amazonaws', name: 'aws-java-sdk-kms', version: "${awsVersion}") {
         exclude(module: 'aws-java-sdk-core')
         exclude(module: 'jmespath-java')
     }
-    compile(group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: '1.11.781') {
+    compile(group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: "${awsVersion}") {
         exclude(module: 'aws-java-sdk-core')
         exclude(module: 'jmespath-java')
     }
-    compile(group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.781') {
+    compile(group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: "${awsVersion}") {
         exclude(module: 'aws-java-sdk-core')
         exclude(module: 'jmespath-java')
         exclude(module: 'aws-java-sdk-kms')
     }
-    compile(group: 'com.amazonaws', name: 'aws-java-sdk-ssm', version: '1.11.781') {
+    compile(group: 'com.amazonaws', name: 'aws-java-sdk-ssm', version: "${awsVersion}") {
         exclude(module: 'aws-java-sdk-core')
         exclude(module: 'jmespath-java')
     }
-    compile(group: 'com.amazonaws', name: 'aws-java-sdk-ec2', version: '1.11.781') {
+    compile(group: 'com.amazonaws', name: 'aws-java-sdk-ec2', version: "${awsVersion}") {
         exclude(module: 'aws-java-sdk-core')
         exclude(module: 'jmespath-java')
     }
-    compile(group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.781') {
+    compile(group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: "${awsVersion}") {
         exclude(module: 'aws-java-sdk-core')
         exclude(module: 'jmespath-java')
     }
-    compile(group: 'com.amazonaws', name: 'aws-java-sdk-sns', version: '1.11.781') {
+    compile(group: 'com.amazonaws', name: 'aws-java-sdk-sns', version: "${awsVersion}") {
         exclude(module: 'aws-java-sdk-core')
         exclude(module: 'jmespath-java')
         exclude(module: 'aws-java-sdk-sqs')
     }
-    compile(group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '1.11.781') {
+    compile(group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: "${awsVersion}") {
         exclude(module: 'aws-java-sdk-core')
         exclude(module: 'jmespath-java')
         exclude(module: 'aws-java-sdk-s3')
     }
-    compile(group: 'com.amazonaws', name: 'aws-java-sdk-cloudwatch', version: '1.11.781') {
+    compile(group: 'com.amazonaws', name: 'aws-java-sdk-cloudwatch', version: "${awsVersion}") {
         exclude(module: 'aws-java-sdk-core')
         exclude(module: 'jmespath-java')
     }
-    compile(group: 'com.amazonaws', name: 'aws-java-sdk-cloudwatchmetrics', version: '1.11.781') {
+    compile(group: 'com.amazonaws', name: 'aws-java-sdk-cloudwatchmetrics', version: "${awsVersion}") {
         exclude(module: 'aws-java-sdk-core')
         exclude(module: 'jmespath-java')
         exclude(module: 'aws-java-sdk-s3')
         exclude(module: 'aws-java-sdk-dynamodb')
         exclude(module: 'aws-java-sdk-cloudwatch')
     }
-    compile(group: 'com.amazonaws', name: 'aws-java-sdk-cognitoidp', version: '1.11.781') {
+    compile(group: 'com.amazonaws', name: 'aws-java-sdk-cognitoidp', version: "${awsVersion}") {
         exclude(module: 'aws-java-sdk-core')
         exclude(module: 'jmespath-java')
     }
-    compile group: 'org.springframework', name: 'spring-jcl', version: '5.2.6.RELEASE'
-    compile(group: 'org.springframework', name: 'spring-core', version: '5.2.6.RELEASE') {
+    compile group: 'org.springframework', name: 'spring-jcl', version: "${springVersion}"
+    compile(group: 'org.springframework', name: 'spring-core', version: "${springVersion}") {
         exclude(module: 'commons-logging')
         exclude(module: 'spring-jcl')
     }
-    compile(group: 'org.springframework', name: 'spring-beans', version: '5.2.6.RELEASE') {
+    compile(group: 'org.springframework', name: 'spring-beans', version: "${springVersion}") {
         exclude(module: 'spring-core')
     }
-    compile(group: 'org.springframework', name: 'spring-aop', version: '5.2.6.RELEASE') {
+    compile(group: 'org.springframework', name: 'spring-aop', version: "${springVersion}") {
         exclude(module: 'spring-core')
         exclude(module: 'spring-beans')
     }
-    compile(group: 'org.springframework', name: 'spring-expression', version: '5.2.6.RELEASE') {
+    compile(group: 'org.springframework', name: 'spring-expression', version: "${springVersion}") {
         exclude(module: 'spring-core')
     }
-    compile(group: 'org.springframework', name: 'spring-context', version: '5.2.6.RELEASE') {
+    compile(group: 'org.springframework', name: 'spring-context', version: "${springVersion}") {
         exclude(module: 'spring-core')
         exclude(module: 'spring-beans')
         exclude(module: 'spring-aop')
         exclude(module: 'spring-expression')
     }
-    compile(group: 'org.springframework', name: 'spring-context-support', version: '5.2.6.RELEASE') {
+    compile(group: 'org.springframework', name: 'spring-context-support', version: "${springVersion}") {
         exclude(module: 'spring-core')
         exclude(module: 'spring-beans')
         exclude(module: 'spring-context')
     }
-    compile(group: 'org.springframework', name: 'spring-tx', version: '5.2.6.RELEASE') {
+    compile(group: 'org.springframework', name: 'spring-tx', version: "${springVersion}") {
         exclude(module: 'spring-beans')
         exclude(module: 'spring-core')
     }
-    compile(group: 'org.springframework', name: 'spring-jdbc', version: '5.2.6.RELEASE') {
+    compile(group: 'org.springframework', name: 'spring-jdbc', version: "${springVersion}") {
         exclude(module: 'spring-beans')
         exclude(module: 'spring-core')
         exclude(module: 'spring-tx')
     }
-    compile(group: 'org.springframework', name: 'spring-messaging', version: '5.2.6.RELEASE') {
+    compile(group: 'org.springframework', name: 'spring-messaging', version: "${springVersion}") {
         exclude(module: 'spring-beans')
         exclude(module: 'spring-core')
         exclude(module: 'spring-context')
+    }
+    compile("org.thymeleaf:thymeleaf:${thymeleafVersion}") {
+        exclude(module: 'slf4j-api')
+        exclude(module: 'ognl')
+        exclude(module: 'attoparser')
+        exclude(module: 'unbescape')
+    }
+    compile("org.thymeleaf:thymeleaf-spring4:${thymeleafVersion}") {
+        exclude(group: 'org.slf4j', module: 'slf4j-api')
+        exclude(group: 'org.thymeleaf', module: 'thymeleaf')
     }
 
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
