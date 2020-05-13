@@ -18,10 +18,7 @@ jobs:
       - run:
           name: Setup GPG and Gradle Props
           command: |
-            sudo apt-get update && sudo apt-get install gettext gnupg2 python3-pip -y && sudo pip3 install awscli
-            aws s3 cp s3://artifacts.abaci.co/.gnupg/pgpout.asc ~/private.key
-            gpg2 --allow-secret-key-import --import ~/private.key
-            gpg2 --export-secret-key ${GPG_KEYID} > secring.gpg
+            sudo apt-get update && sudo apt-get install gettext -y
             envsubst < "gradle.properties.tpl" > "gradle.properties"
       - restore_cache:
           keys:

@@ -10,8 +10,9 @@ import java.io.InputStream;
 
 import static io.polyglotted.common.aws.AwsConfig.createS3Client;
 import static io.polyglotted.common.aws.AwsConfig.s3EncryptionClient;
+import static io.polyglotted.common.util.BaseSerializer.deserialize;
+import static io.polyglotted.common.util.MapRetriever.reqdStr;
 import static io.polyglotted.common.util.MapperUtil.readToMap;
-import static io.polyglotted.common.util.MapperUtil.reqdStr;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public abstract class ObjectFetcher {
@@ -39,6 +40,6 @@ public abstract class ObjectFetcher {
 
     private static String fetchCmkId(ObjectMetadata metadata) throws IOException {
         String matDesc = metadata.getUserMetaDataOf("x-amz-matdesc");
-        return matDesc == null ? null : reqdStr(readToMap(matDesc), "kms_cmk_id");
+        return matDesc == null ? null : reqdStr(deserialize(matDesc), "kms_cmk_id");
     }
 }

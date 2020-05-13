@@ -40,7 +40,6 @@ import org.elasticsearch.client.ResponseException;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.sniff.Sniffer;
-import org.elasticsearch.common.util.ByteArray;
 import org.elasticsearch.index.query.QueryBuilder;
 
 import java.io.IOException;
@@ -50,7 +49,7 @@ import java.util.Set;
 
 import static io.polyglotted.common.es.ElasticException.checkState;
 import static io.polyglotted.common.es.ElasticException.handleEx;
-import static io.polyglotted.common.util.MapperUtil.readToMap;
+import static io.polyglotted.common.util.BaseSerializer.deserialize;
 import static org.apache.http.HttpStatus.SC_MULTIPLE_CHOICES;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.apache.http.entity.ContentType.APPLICATION_JSON;
@@ -88,7 +87,7 @@ public class EsRestClient implements ElasticClient {
 
     @Override public Set<String> getIndices(String alias) {
         try {
-            Map<String, Object> responseObject = readToMap(performCliRequest("GET", "/" + alias + "/_aliases"));
+            Map<String, Object> responseObject = deserialize(performCliRequest("GET", "/" + alias + "/_aliases"));
             return ImmutableSet.copyOf(responseObject.keySet());
         } catch (Exception ioe) {
             throw handleEx("getIndices failed", ioe);
@@ -184,7 +183,7 @@ public class EsRestClient implements ElasticClient {
 
     @Override public Map<String, Object> clusterHealth() {
         try {
-            return readToMap(performCliRequest("GET", "/_cluster/health"));
+            return deserialize(performCliRequest("GET", "/_cluster/health"));
         } catch (Exception ioe) {
             throw handleEx("clusterHealth failed", ioe);
         }
