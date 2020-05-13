@@ -14,6 +14,7 @@ import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsReques
 import org.elasticsearch.action.admin.indices.exists.types.TypesExistsRequest;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
 import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsRequest;
+import org.elasticsearch.action.admin.indices.template.get.GetIndexTemplatesResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
@@ -265,6 +266,34 @@ public class EsTransportClient implements ElasticClient {
         try {
             return internalClient.admin().cluster().prepareGetPipeline(id).execute().actionGet().isFound();
         } catch (Exception ex) { throw handleEx("pipelineExists failed", ex); }
+    }
+
+    @Override public void deletePipeline(String id) {
+        try {
+            checkState(internalClient.admin().cluster().prepareDeletePipeline(id).execute()
+                    .actionGet().isAcknowledged(), "unable to delete pipeline");
+        } catch (Exception ex) { throw handleEx("deletePipeline failed", ex); }
+    }
+
+    @Override public void putTemplate(String name, String body) {
+        try {
+            checkState(internalClient.admin().indices().preparePutTemplate(name).setSource(new BytesArray(body), JSON)
+                    .execute().actionGet().isAcknowledged(), "unable to put template");
+        } catch (Exception ex) { throw handleEx("putTemplate failed", ex); }
+    }
+
+    @Override public boolean templateExists(String name) {
+        try {
+            return !internalClient.admin().indices().prepareGetTemplates(name).execute().actionGet()
+                    .getIndexTemplates().isEmpty();
+        } catch (Exception ex) { throw handleEx("templateExists failed", ex); }
+    }
+
+    @Override public void deleteTemplate(String name) {
+        try {
+            checkState(internalClient.admin().indices().prepareDeleteTemplate(name)
+                    .execute().actionGet().isAcknowledged(), "unable to delete template");
+        } catch (Exception ex) { throw handleEx("deleteTemplate failed", ex); }
     }
 
     @Override public IndexResponse index(IndexRequest request) {

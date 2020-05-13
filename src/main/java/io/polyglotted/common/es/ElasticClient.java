@@ -64,6 +64,14 @@ public interface ElasticClient extends AutoCloseable {
 
     boolean pipelineExists(String id);
 
+    void deletePipeline(String id);
+
+    void putTemplate(String name, String body);
+
+    boolean templateExists(String name);
+
+    void deleteTemplate(String name);
+
     IndexResponse index(IndexRequest request);
 
     UpdateResponse update(UpdateRequest request);

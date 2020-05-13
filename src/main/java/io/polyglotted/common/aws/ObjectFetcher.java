@@ -12,7 +12,6 @@ import static io.polyglotted.common.aws.AwsConfig.createS3Client;
 import static io.polyglotted.common.aws.AwsConfig.s3EncryptionClient;
 import static io.polyglotted.common.util.BaseSerializer.deserialize;
 import static io.polyglotted.common.util.MapRetriever.reqdStr;
-import static io.polyglotted.common.util.MapperUtil.readToMap;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public abstract class ObjectFetcher {

@@ -133,7 +133,9 @@ public class EsRestClient implements ElasticClient {
     @Override public void createIndex(String index, String resource) {
         try {
             simplePut("/" + index, resource, "createIndex");
-        } catch (Exception ioe) { throw handleEx("createIndex failed", ioe); }
+        } catch (Exception ioe) {
+            throw handleEx("createIndex failed", ioe);
+        }
     }
 
     @Override public void updateAlias(IndicesAliasesRequest request) {
@@ -194,7 +196,23 @@ public class EsRestClient implements ElasticClient {
     }
 
     @Override public boolean pipelineExists(String id) {
-        return simpleGet( "/_ingest/pipeline/" + id, "pipelineExists") != null;
+        return simpleGet("/_ingest/pipeline/" + id, "pipelineExists") != null;
+    }
+
+    @Override public void deletePipeline(String id) {
+        simpleDelete("/_ingest/pipeline/" + id, "deletePipeline");
+    }
+
+    @Override public void putTemplate(String name, String body) {
+        simplePut("/_template/" + name, body, "putTemplate");
+    }
+
+    @Override public boolean templateExists(String name) {
+        return simpleGet("/_template/" + name, "templateExists") != null;
+    }
+
+    @Override public void deleteTemplate(String name) {
+        simpleDelete("/_template/" + name, "deleteTemplate");
     }
 
     @Override public IndexResponse index(IndexRequest request) {
